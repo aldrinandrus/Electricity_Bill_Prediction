@@ -38,7 +38,7 @@ step=1.0
 
 if st.button("Predict Electric Bill"):
 
-```
+
 # Convert input into the format expected by the model
 input_data = np.array([[ac_units]])
 
@@ -51,4 +51,4 @@ st.success(
 )
 
 st.write(f"AC Units: **{ac_units:.2f}**")
-```
+
