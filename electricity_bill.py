@@ -2,28 +2,43 @@
 import streamlit as st
 import joblib
 import numpy as np
+from sklearn.preprocessing import PolynomialFeatures
 
-# Page configuration
+# ============================================================
+# Page Configuration
+# ============================================================
+
 st.set_page_config(
     page_title="Electricity Bill Prediction",
     page_icon="⚡",
     layout="centered"
 )
 
-# Load trained model
-model = joblib.load("PolynomialRegression_ElectricBill_AC.pkl")
+# ============================================================
+# Load Model
+# ============================================================
 
-# Application title
+MODEL_FILE = "PolynomialRegression_ElectricBill_AC.pkl"
+
+model = joblib.load(MODEL_FILE)
+
+# ============================================================
+# Application Title
+# ============================================================
+
 st.title("⚡ Electricity Bill Prediction")
 
 st.write(
-    "Predict the Electric Bill using AC electricity consumption "
-    "with Polynomial Regression."
+    "Predict the Electric Bill using AC electricity "
+    "consumption with Polynomial Regression."
 )
 
 st.divider()
 
-# AC Units input
+# ============================================================
+# User Input
+# ============================================================
+
 ac_units = st.number_input(
     "Enter AC Units",
     min_value=0.0,
@@ -31,19 +46,60 @@ ac_units = st.number_input(
     step=1.0
 )
 
-# Prediction button
+# ============================================================
+# Prediction
+# ============================================================
+
 if st.button("Predict Electric Bill"):
 
-    # Prepare input
+    # Original input
     input_data = np.array([[ac_units]])
 
-    # Make prediction
-    prediction = model.predict(input_data)[0]
+    # --------------------------------------------------------
+    # Create Polynomial Features
+    # Degree = 2
+    # --------------------------------------------------------
 
-    # Display prediction
-    st.success(
-        f"Predicted Electric Bill: ₹{prediction:.2f}"
+    polynomial = PolynomialFeatures(
+        degree=2,
+        include_bias=True
     )
 
-    st.write(f"AC Units: **{ac_units:.2f}**")
+    polynomial_input = polynomial.fit_transform(input_data)
+
+    # --------------------------------------------------------
+    # Check number of features expected by the model
+    # --------------------------------------------------------
+
+    expected_features = model.n_features_in_
+    actual_features = polynomial_input.shape[1]
+
+    # --------------------------------------------------------
+    # Prediction
+    # --------------------------------------------------------
+
+    if expected_features == actual_features:
+
+        prediction = model.predict(polynomial_input)[0]
+
+        st.success(
+            f"Predicted Electric Bill: ₹{prediction:.2f}"
+        )
+
+        st.write(
+            f"AC Units: **{ac_units:.2f}**"
+        )
+
+    else:
+
+        st.error(
+            f"Model expects {expected_features} features, "
+            f"but the polynomial transformation produced "
+            f"{actual_features} features."
+        )
+
+        st.info(
+            "The saved .pkl model was trained with a different "
+            "feature/preprocessing configuration."
+        )
 
