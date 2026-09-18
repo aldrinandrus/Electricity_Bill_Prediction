@@ -1,4 +1,4 @@
-```python
+
 import streamlit as st
 import joblib
 import numpy as np
@@ -46,4 +46,4 @@ if st.button("Predict Electric Bill"):
     )
 
     st.write(f"AC Units: **{ac_units:.2f}**")
-```
+
